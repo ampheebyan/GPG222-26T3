@@ -1,4 +1,5 @@
 using System;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
@@ -10,17 +11,20 @@ public enum GearShift
     Reverse,
     Drive
 }
-public class SteeringController : MonoBehaviour
+public class SteeringController : NetworkBehaviour
 {
-    
+    public override void OnNetworkSpawn()
+    {
+        if (!IsServer) enabled = false;
+    }
     // https://docs.unity3d.com/6000.0/Documentation/Manual/WheelColliderTutorial.html using this btw, never used WheelColliders before tbh
     
     [SerializeField] private InputActionReference accelerate;
     [SerializeField] private InputActionReference brake;
-    private float accelerateValue;
-    private float brakeValue;
+    public float accelerateValue;
+    public float brakeValue;
     [SerializeField] private InputActionReference steering;
-    private float steeringValue;
+    public float steeringValue;
     [SerializeField] private WheelCollider frontLeftWheel, frontRightWheel, backLeftWheel, backRightWheel;
     public GearShift gear = GearShift.Parked;
     public float power = 1500f;
@@ -36,16 +40,19 @@ public class SteeringController : MonoBehaviour
 
     private void Update()
     {
-        accelerateValue = accelerate.action.ReadValue<float>();
-        brakeValue = brake.action.ReadValue<float>();
-        steeringValue = steering.action.ReadValue<float>();
+        //accelerateValue = accelerate.action.ReadValue<float>();
+        //brakeValue = brake.action.ReadValue<float>();
+        //steeringValue = steering.action.ReadValue<float>();
     }
 
-    public void GearShiftUp()
+    [Rpc(SendTo.Everyone)]
+    public void GearShiftUp_Rpc()
     {
         gear = (GearShift)Mathf.Clamp((int)(gear + 1), 0, 3);
     }
-    public void GearShiftDown()
+    
+    [Rpc(SendTo.Everyone)]
+    public void GearShiftDown_Rpc()
     {
         gear = (GearShift)Mathf.Clamp((int)(gear - 1), 0, 3);
     }
