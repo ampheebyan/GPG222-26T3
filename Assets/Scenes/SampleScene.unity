@@ -2298,16 +2298,15 @@ MonoBehaviour:
   accelerateValue: 0
   brakeValue: 0
   steeringValue: 0
+  speedKmh: 0
+  gear: 0
+  cVars: {fileID: 11400000, guid: 5f364b214d7c084469efbd4607b41171, type: 2}
   frontLeftWheel: {fileID: 1247399126}
   frontRightWheel: {fileID: 1389805956}
   backLeftWheel: {fileID: 1438157522}
   backRightWheel: {fileID: 271875503}
-  gear: 0
-  power: 4600
-  angle: {x: 30, y: 60}
   rb: {fileID: 1867524880}
   centerOfMass: {fileID: 387232441}
-  speedKmh: 0
 --- !u!4 &1867524882
 Transform:
   m_ObjectHideFlags: 0
