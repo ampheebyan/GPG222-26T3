@@ -60,7 +60,7 @@ MonoBehaviour:
       m_Calls: []
   m_ActionEvents: []
   m_NeverAutoSwitchControlSchemes: 0
-  m_DefaultControlScheme: Keyboard
+  m_DefaultControlScheme: 
   m_DefaultActionMap: Car Control
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
@@ -76,14 +76,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1741847236
+  GlobalObjectIdHash: 3159759702
   InScenePlacedSourceGlobalObjectIdHash: 0
   m_InScenePlacedDisabledByDefault: 0
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
-  m_InScenePlaced: 1
+  m_InScenePlaced: 0
   ActiveSceneSynchronization: 0
   SceneMigrationSynchronization: 0
   SpawnWithObservers: 1
@@ -105,3 +105,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GearShiftConnector
   ShowTopMostFoldoutHeaderGroup: 1
   CarController: {fileID: 0}
+  localData:
+    Steering: 0
+    Accelerator: 0
+    Brake: 0

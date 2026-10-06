@@ -18,30 +18,28 @@ public class SteeringController : NetworkBehaviour
         if (!IsServer) enabled = false;
     }
     // https://docs.unity3d.com/6000.0/Documentation/Manual/WheelColliderTutorial.html using this btw, never used WheelColliders before tbh
-    
+    [Header("VVVV DO NOT TOUCH VVVV")]
     public float accelerateValue;
     public float brakeValue;
     public float steeringValue;
-    [SerializeField] private WheelCollider frontLeftWheel, frontRightWheel, backLeftWheel, backRightWheel;
+    [Header("Car Information")]
+    public float speedKmh;
     public GearShift gear = GearShift.Parked;
-    public float power = 1500f;
-    public Vector2 angle = new (30, 60);
+    [Header("Car Variables")]
+    public CarValues cVars;
+    [SerializeField] private WheelCollider frontLeftWheel, frontRightWheel, backLeftWheel, backRightWheel;
+    [Header("Extra Assignables")]
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Transform centerOfMass;
-    public float speedKmh;
     private bool _bLock = false;
     private void Start()
     {
+        if (!cVars)
+        {
+            throw new Exception("How did you even get to this point?");
+        }
         if(centerOfMass) rb.centerOfMass = centerOfMass.localPosition;
     }
-
-    private void Update()
-    {
-        //accelerateValue = accelerate.action.ReadValue<float>();
-        //brakeValue = brake.action.ReadValue<float>();
-        //steeringValue = steering.action.ReadValue<float>();
-    }
-
 
     private void FixedUpdate()
     {
@@ -49,8 +47,8 @@ public class SteeringController : NetworkBehaviour
         float fSpeed = Vector3.Dot(transform.forward, rb.linearVelocity);
         float sFactor = Mathf.InverseLerp(0, 120f, Mathf.Abs(fSpeed));
 
-        float motorTorque = Mathf.Lerp(power, 0, sFactor);
-        float steerRange = Mathf.Lerp(angle.x, angle.y, sFactor);
+        float motorTorque = Mathf.Lerp(cVars.power, 0, sFactor);
+        float steerRange = Mathf.Lerp(cVars.angle.x, cVars.angle.y, sFactor);
 
         frontLeftWheel.steerAngle = steeringValue * steerRange;
         frontRightWheel.steerAngle = steeringValue * steerRange;
@@ -58,8 +56,9 @@ public class SteeringController : NetworkBehaviour
         {
             backLeftWheel.motorTorque = 0f;
             backRightWheel.motorTorque = 0f;
-            backLeftWheel.brakeTorque = 9001f;
-            backRightWheel.brakeTorque = 9001f;
+            rb.linearVelocity /= 4;
+            backLeftWheel.brakeTorque = 15000f;
+            backRightWheel.brakeTorque = 15000f;
             return;
         }
 
@@ -72,8 +71,8 @@ public class SteeringController : NetworkBehaviour
             {
                 backLeftWheel.motorTorque = 0f;
                 backRightWheel.motorTorque = 0f;
-                backLeftWheel.brakeTorque = brakeValue * motorTorque;
-                backRightWheel.brakeTorque = brakeValue * motorTorque;
+                backLeftWheel.brakeTorque = brakeValue * cVars.brakePower;
+                backRightWheel.brakeTorque = brakeValue * cVars.brakePower;
             }
             else
             {
