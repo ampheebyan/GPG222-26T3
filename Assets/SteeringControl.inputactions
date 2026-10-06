@@ -7,15 +7,6 @@
             "id": "7e5d3c61-700a-4815-a98b-ba531cbfd017",
             "actions": [
                 {
-                    "name": "Pedals",
-                    "type": "Value",
-                    "id": "f583667b-f754-4ef6-aa7d-a7eea0da9b1d",
-                    "expectedControlType": "Axis",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true
-                },
-                {
                     "name": "Steering",
                     "type": "Value",
                     "id": "1790c18c-ca09-4567-a6fc-425e651b1e32",
@@ -41,13 +32,31 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Accelerate",
+                    "type": "Value",
+                    "id": "8ee406f5-dce8-4abd-aac1-7b9a9551c86c",
+                    "expectedControlType": "Analog",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Brake",
+                    "type": "Value",
+                    "id": "357deaad-d43a-41c3-83ef-5c45433e9cb6",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
                 {
                     "name": "",
                     "id": "07087e52-0ddc-47b6-b56e-c4d8457c06f5",
-                    "path": "",
+                    "path": "<Keyboard>/upArrow",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -58,7 +67,7 @@
                 {
                     "name": "",
                     "id": "efbd3b64-8ec7-4d0f-bf07-fc3f8d7ec54a",
-                    "path": "",
+                    "path": "<Keyboard>/downArrow",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -100,37 +109,26 @@
                     "isPartOfComposite": true
                 },
                 {
-                    "name": "1D Axis",
-                    "id": "04ae5b95-cb3c-47aa-8f27-488a613c5dc1",
-                    "path": "1DAxis",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Pedals",
-                    "isComposite": true,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "negative",
-                    "id": "ad892fe4-d987-4436-be79-52e908b0fa10",
-                    "path": "<Keyboard>/s",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Pedals",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "positive",
-                    "id": "13551fc0-3376-49c0-939a-380fcdad26f0",
+                    "name": "",
+                    "id": "9ee45dc0-2a3c-4ae6-a315-c31d12bc2071",
                     "path": "<Keyboard>/w",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Pedals",
+                    "action": "Accelerate",
                     "isComposite": false,
-                    "isPartOfComposite": true
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f2abbd44-4bf7-4e9d-86b2-29db2adfbbe3",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Brake",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }
