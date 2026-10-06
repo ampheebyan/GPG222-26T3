@@ -105,7 +105,7 @@ public class NetworkedCarHandler : NetworkBehaviour
     {
         PublicCarStateData carData = new PublicCarStateData()
         {
-            SpeedKmh = car.speedKmh,
+            SpeedKmh = car.speedMS,
             Gear = car.gear
         };
      

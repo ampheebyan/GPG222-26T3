@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 93469382cb384e9e84a60407da04629a, type: 3}
-  m_Name: Normal Car
+  m_Name: Shitbox
   m_EditorClassIdentifier: Assembly-CSharp::CarValues
   power: 3600
   brakePower: 10000
   angle: {x: 30, y: 60}
-  maxSpeed: 16
+  maxSpeed: 8

@@ -13,6 +13,7 @@ public enum GearShift
 }
 public class SteeringController : NetworkBehaviour
 {
+    // All movement is handled on server so disable this
     public override void OnNetworkSpawn()
     {
         if (!IsServer) enabled = false;
@@ -22,8 +23,10 @@ public class SteeringController : NetworkBehaviour
     public float accelerateValue;
     public float brakeValue;
     public float steeringValue;
+    [SerializeField] private float fSpeed;
+    [SerializeField] private float sFactor;
     [Header("Car Information")]
-    public float speedKmh;
+    public float speedMS;
     public GearShift gear = GearShift.Parked;
     [Header("Car Variables")]
     public CarValues cVars;
@@ -32,6 +35,7 @@ public class SteeringController : NetworkBehaviour
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Transform centerOfMass;
     private bool _bLock = false;
+
     private void Start()
     {
         if (!cVars)
@@ -43,31 +47,24 @@ public class SteeringController : NetworkBehaviour
 
     private void FixedUpdate()
     {
-        speedKmh = Mathf.RoundToInt(rb.linearVelocity.magnitude * 3.6f);
-        float fSpeed = Vector3.Dot(transform.forward, rb.linearVelocity);
-        float sFactor = Mathf.InverseLerp(0, 120f, Mathf.Abs(fSpeed));
-
+        speedMS = Mathf.RoundToInt(rb.linearVelocity.magnitude);
+        fSpeed = Vector3.Dot(transform.forward, rb.linearVelocity);
+        sFactor = Mathf.InverseLerp(0, cVars.maxSpeed, Mathf.Abs(fSpeed));
         float motorTorque = Mathf.Lerp(cVars.power, 0, sFactor);
         float steerRange = Mathf.Lerp(cVars.angle.x, cVars.angle.y, sFactor);
-
         frontLeftWheel.steerAngle = steeringValue * steerRange;
         frontRightWheel.steerAngle = steeringValue * steerRange;
         if (gear == GearShift.Parked)
         {
             backLeftWheel.motorTorque = 0f;
             backRightWheel.motorTorque = 0f;
-            rb.linearVelocity /= 4;
-            backLeftWheel.brakeTorque = 15000f;
-            backRightWheel.brakeTorque = 15000f;
+            backLeftWheel.brakeTorque = cVars.brakePower;
+            backRightWheel.brakeTorque = cVars.brakePower;
             return;
         }
-
-        
         if (brakeValue > 0)
         {
-            Debug.Log("Brake");
-
-            if (speedKmh > 0f && _bLock == false)
+            if (speedMS > 0f && _bLock == false)
             {
                 backLeftWheel.motorTorque = 0f;
                 backRightWheel.motorTorque = 0f;
@@ -85,27 +82,40 @@ public class SteeringController : NetworkBehaviour
         }
         else
         {
-            if (Mathf.Approximately(accelerateValue, 0f))
+            if (Mathf.Approximately(accelerateValue, 0f) && Mathf.Approximately(speedMS, 3f))
             {
-                backLeftWheel.motorTorque = 0f;
-                backRightWheel.motorTorque = 0f;
-            }
-            if (gear == GearShift.Drive)
+                backLeftWheel.brakeTorque = cVars.brakePower / 2;
+                backRightWheel.brakeTorque = cVars.brakePower / 2;
+            } else if (gear == GearShift.Drive)
             {
                 _bLock = false;
-                Debug.Log("Drive");
-                Debug.Log(accelerateValue);
-                backLeftWheel.motorTorque = accelerateValue * motorTorque;
-                backRightWheel.motorTorque = accelerateValue * motorTorque;
+
+                if (Mathf.Abs(fSpeed) < cVars.maxSpeed)
+                {
+                    backLeftWheel.motorTorque = accelerateValue * motorTorque;
+                    backRightWheel.motorTorque = accelerateValue * motorTorque;
+                }
+                else
+                {
+                    backLeftWheel.motorTorque = 0f;
+                    backRightWheel.motorTorque = 0f;
+                }
                 backLeftWheel.brakeTorque = 0f;
                 backRightWheel.brakeTorque = 0f;
+
             } else if (gear == GearShift.Reverse)
             {
                 _bLock = false;
-                Debug.Log("Reverse");
-                Debug.Log(accelerateValue);
-                backLeftWheel.motorTorque = -accelerateValue * motorTorque;
-                backRightWheel.motorTorque = -accelerateValue * motorTorque;
+                if (Mathf.Abs(fSpeed) < cVars.maxSpeed)
+                {
+                    backLeftWheel.motorTorque = -accelerateValue * motorTorque;
+                    backRightWheel.motorTorque = -accelerateValue * motorTorque;
+                }
+                else
+                {
+                    backLeftWheel.motorTorque = 0f;
+                    backRightWheel.motorTorque = 0f;
+                }
                 backLeftWheel.brakeTorque = 0f;
                 backRightWheel.brakeTorque = 0f;
             } 

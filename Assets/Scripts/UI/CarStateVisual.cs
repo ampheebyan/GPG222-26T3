@@ -17,6 +17,6 @@ public class CarStateVisual : NetworkBehaviour
 
     private void FixedUpdate()
     {
-        if(text) text.SetText($"{carState.Gear}\n{carState.SpeedKmh}km/h");
+        if(text) text.SetText($"{carState.Gear}\n{carState.SpeedKmh}m/s");
     }
 }
