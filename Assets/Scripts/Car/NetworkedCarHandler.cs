@@ -4,25 +4,66 @@ using Unity.Netcode;
 using UnityEngine;
 
 [Serializable]
-public struct NetPlayData
+public struct NetPlayData : INetworkSerializable
 {
     public float Steering;
     public float Accelerator;
     public float Brake;
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+    {
+        serializer.SerializeValue(ref Steering);
+        serializer.SerializeValue(ref Accelerator);
+        serializer.SerializeValue(ref Brake);
+    }
+}
+
+[Serializable]
+public struct PublicCarStateData : INetworkSerializable
+{
+    public GearShift Gear;
+    public float SpeedKmh;
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+    {
+        serializer.SerializeValue(ref Gear);
+        serializer.SerializeValue(ref SpeedKmh);
+    }
 }
 public class NetworkedCarHandler : NetworkBehaviour
 {
     public SteeringController car;
-
-    public Dictionary<ulong, NetPlayData> players = new();
-
+    public CarStateVisual CarStateVisual;
+    private Dictionary<ulong, NetPlayData> players = new();
+    
     public override void OnNetworkSpawn()
     {
     }
-    
-    private void Update()
+
+    private void FixedUpdate()
     {
-        if (!IsServer) return;
+        if (IsServer)
+        {
+            CarStateBroadcast_Rpc();
+        }
+    }
+
+    [Rpc(SendTo.Server)]
+    public void UpdateValues_Rpc(ulong id, NetPlayData data)
+    {
+        if (players.ContainsKey(id))
+        {
+            players[id] = data;
+        }
+        else
+        {
+            players.TryAdd(id, data);
+        }
+        
+        UpdateCarValues_Rpc();
+    }
+
+    [Rpc(SendTo.Server)]
+    private void UpdateCarValues_Rpc()
+    {
         float steering = 0;
         float accelerator = 0;
         float brake = 0;
@@ -37,14 +78,37 @@ public class NetworkedCarHandler : NetworkBehaviour
             accelerator = Mathf.Clamp(accelerator + data.Accelerator, -1, 1);    
             brake = Mathf.Clamp(brake + data.Brake, -1, 1);    
         }
-        
-        UpdateValues_Rpc(accelerator, brake, steering);
-    }
-    [Rpc(SendTo.ClientsAndHost)]
-    private void UpdateValues_Rpc(float accelerator, float brake, float steering)
-    {
+
         if(!Mathf.Approximately(car.steeringValue, steering)) car.steeringValue = steering;
         if(!Mathf.Approximately(car.accelerateValue, accelerator)) car.accelerateValue = accelerator;
         if(!Mathf.Approximately(car.brakeValue, brake)) car.brakeValue = brake;
+
+        CarStateBroadcast_Rpc();
+
+    }
+    [Rpc(SendTo.Server)]
+    public void GearShiftUp_Rpc()
+    {
+        car.gear = (GearShift)Mathf.Clamp((int)(car.gear + 1), 0, 3);
+        CarStateBroadcast_Rpc();
+    }
+    
+    [Rpc(SendTo.Server)]
+    public void GearShiftDown_Rpc()
+    {
+        car.gear = (GearShift)Mathf.Clamp((int)(car.gear - 1), 0, 3);
+        CarStateBroadcast_Rpc();
+    }
+
+    [Rpc(SendTo.Server)]
+    private void CarStateBroadcast_Rpc()
+    {
+        PublicCarStateData carData = new PublicCarStateData()
+        {
+            SpeedKmh = car.speedKmh,
+            Gear = car.gear
+        };
+     
+        CarStateVisual.UpdateCarState_Rpc(carData);
     }
 }

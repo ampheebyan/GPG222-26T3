@@ -19,11 +19,8 @@ public class SteeringController : NetworkBehaviour
     }
     // https://docs.unity3d.com/6000.0/Documentation/Manual/WheelColliderTutorial.html using this btw, never used WheelColliders before tbh
     
-    [SerializeField] private InputActionReference accelerate;
-    [SerializeField] private InputActionReference brake;
     public float accelerateValue;
     public float brakeValue;
-    [SerializeField] private InputActionReference steering;
     public float steeringValue;
     [SerializeField] private WheelCollider frontLeftWheel, frontRightWheel, backLeftWheel, backRightWheel;
     public GearShift gear = GearShift.Parked;
@@ -45,17 +42,7 @@ public class SteeringController : NetworkBehaviour
         //steeringValue = steering.action.ReadValue<float>();
     }
 
-    [Rpc(SendTo.Everyone)]
-    public void GearShiftUp_Rpc()
-    {
-        gear = (GearShift)Mathf.Clamp((int)(gear + 1), 0, 3);
-    }
-    
-    [Rpc(SendTo.Everyone)]
-    public void GearShiftDown_Rpc()
-    {
-        gear = (GearShift)Mathf.Clamp((int)(gear - 1), 0, 3);
-    }
+
     private void FixedUpdate()
     {
         speedKmh = Mathf.RoundToInt(rb.linearVelocity.magnitude * 3.6f);
@@ -124,6 +111,5 @@ public class SteeringController : NetworkBehaviour
                 backRightWheel.brakeTorque = 0f;
             } 
         }
-
     }
 }

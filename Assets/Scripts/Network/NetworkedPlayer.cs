@@ -16,7 +16,7 @@ public class NetworkedPlayer : NetworkBehaviour
         {
             if (TryGetComponent(out PlayerInput playerInput))
             {
-                // Disable everyone else's PlayerInput so they don't interfere. This is not the best way to handle this, but this does what I want.
+                // Disable non local PlayerInput so they don't interfere. (I think) This is not the best way to handle this, but this does what I want.
                 playerInput.enabled = false;
             }
         }
@@ -26,15 +26,14 @@ public class NetworkedPlayer : NetworkBehaviour
     {
         float temp = value.Get<float>();
         localData.Steering = temp;
-        UpdateValues_Rpc();
-
+        if(CarController) CarController.UpdateValues_Rpc(OwnerClientId, localData);
     }
 
     public void OnBrake(InputValue value)
     {
         float temp = value.Get<float>();
         localData.Brake = temp;
-        UpdateValues_Rpc();
+        if(CarController) CarController.UpdateValues_Rpc(OwnerClientId, localData);
 
     }
 
@@ -42,38 +41,17 @@ public class NetworkedPlayer : NetworkBehaviour
     {
         float temp = value.Get<float>();
         localData.Accelerator = temp;
-        UpdateValues_Rpc();
+        if(CarController) CarController.UpdateValues_Rpc(OwnerClientId, localData);
 
     }
     
-    [Rpc(SendTo.ClientsAndHost)]
-    private void UpdateValues_Rpc()
-    {
-        Debug.Log($"{localData.Steering}, {localData.Brake}, {localData.Accelerator}");
-        if (CarController)
-        {
-            if (CarController.players.ContainsKey(OwnerClientId))
-            {
-                CarController.players[OwnerClientId] = localData;
-            }
-            else
-            {
-                CarController.players.TryAdd(OwnerClientId, localData);
-            }
-        }
-    }
-    
-    private void Update()
-    {
-    }
-
     public void OnGearShiftUp()
     {
-        if(CarController) CarController.car.GearShiftUp_Rpc();
+        if(CarController) CarController.GearShiftUp_Rpc();
     }
 
     public void OnGearShiftDown()
     {
-        if(CarController) CarController.car.GearShiftDown_Rpc();
+        if(CarController) CarController.GearShiftDown_Rpc();
     }
 }
