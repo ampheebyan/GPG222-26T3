@@ -1,17 +1,55 @@
 using System;
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 public class NetworkedPlayer : NetworkBehaviour
 {
-    public NetworkedCarHandler CarController;
+    [FormerlySerializedAs("CarController")] public NetworkedCarHandler carController;
+    public GameManager instancedGameManager;
+    public int carIndex = 0;
     public NetPlayData localData = new NetPlayData();
+
+    public override void OnDestroy()
+    {
+        if (!IsLocalPlayer) return; 
+        if(carController) carController.RemovePlayer_Rpc(OwnerClientId);
+    }
+
+    protected override void OnNetworkPostSpawn()
+    {
+        if (!IsLocalPlayer) return;
+        
+        if (carController)
+        {
+            StartCoroutine(CallNextFrame());
+        }
+    }
+
+    private IEnumerator CallNextFrame()
+    {
+        yield return null;
+
+        if (IsSpawned && carController)
+        {
+            carController.AddPlayer_Rpc(OwnerClientId);
+        }
+    }
     public override void OnNetworkSpawn()
     {
         Debug.Log($"{OwnerClientId}: Spawned NetworkedPlayer");
 
-        CarController = GameObject.FindGameObjectWithTag("Car").GetComponent<NetworkedCarHandler>();
+        if (GameManager.Instance)
+        {
+            instancedGameManager = GameManager.Instance;
+            carController = instancedGameManager.networkedCars[carIndex];
+            if (!carController)
+            {
+                throw new Exception("No possible Networked Car.");
+            }
+        }
         if (!IsLocalPlayer)
         {
             if (TryGetComponent(out PlayerInput playerInput))
@@ -26,14 +64,14 @@ public class NetworkedPlayer : NetworkBehaviour
     {
         float temp = value.Get<float>();
         localData.Steering = temp;
-        if(CarController) CarController.UpdateValues_Rpc(OwnerClientId, localData);
+        if(carController) carController.UpdateValues_Rpc(OwnerClientId, localData);
     }
 
     public void OnBrake(InputValue value)
     {
         float temp = value.Get<float>();
         localData.Brake = temp;
-        if(CarController) CarController.UpdateValues_Rpc(OwnerClientId, localData);
+        if(carController) carController.UpdateValues_Rpc(OwnerClientId, localData);
 
     }
 
@@ -41,17 +79,17 @@ public class NetworkedPlayer : NetworkBehaviour
     {
         float temp = value.Get<float>();
         localData.Accelerator = temp;
-        if(CarController) CarController.UpdateValues_Rpc(OwnerClientId, localData);
+        if(carController) carController.UpdateValues_Rpc(OwnerClientId, localData);
 
     }
     
     public void OnGearShiftUp()
     {
-        if(CarController) CarController.GearShiftUp_Rpc();
+        if(carController) carController.GearShiftUp_Rpc();
     }
 
     public void OnGearShiftDown()
     {
-        if(CarController) CarController.GearShiftDown_Rpc();
+        if(carController) carController.GearShiftDown_Rpc();
     }
 }

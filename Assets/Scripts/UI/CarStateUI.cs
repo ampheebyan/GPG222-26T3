@@ -4,7 +4,7 @@ using UnityEngine;
 using TMPro;
 using Unity.VisualScripting;
 
-public class CarStateVisual : NetworkBehaviour
+public class CarStateUI : NetworkBehaviour
 {
     [SerializeField]
     public PublicCarStateData carState;

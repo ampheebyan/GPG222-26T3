@@ -7,33 +7,34 @@ using UnityEngine.Serialization;
 public enum GearShift
 {
     Parked,
-    Neutral,
     Reverse,
+    Neutral,
     Drive
 }
-public class SteeringController : NetworkBehaviour
+public class CarModel : NetworkBehaviour
 {
     // All movement is handled on server so disable this
     public override void OnNetworkSpawn()
     {
         if (!IsServer) enabled = false;
     }
+    
     // https://docs.unity3d.com/6000.0/Documentation/Manual/WheelColliderTutorial.html using this btw, never used WheelColliders before tbh
-    [Header("VVVV DO NOT TOUCH VVVV")]
-    public float accelerateValue;
-    public float brakeValue;
-    public float steeringValue;
     [SerializeField] private float fSpeed;
     [SerializeField] private float sFactor;
     [Header("Car Information")]
     public float speedMS;
     public GearShift gear = GearShift.Parked;
     [Header("Car Variables")]
-    public CarValues cVars;
+    public CarSettings cVars;
     [SerializeField] private WheelCollider frontLeftWheel, frontRightWheel, backLeftWheel, backRightWheel;
     [Header("Extra Assignables")]
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Transform centerOfMass;
+    [Header("VVVV DO NOT TOUCH VVVV")]
+    public float accelerateValue;
+    public float brakeValue;
+    public float steeringValue;
     private bool _bLock = false;
 
     private void Start()
