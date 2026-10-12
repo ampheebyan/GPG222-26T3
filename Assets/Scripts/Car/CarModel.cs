@@ -13,7 +13,7 @@ public enum GearShift
 }
 public class CarModel : NetworkBehaviour
 {
-    // All movement is handled on server so disable this
+    // All movement is handled on server so disable this for anyone who is Not the server.
     public override void OnNetworkSpawn()
     {
         if (!IsServer) enabled = false;
@@ -48,6 +48,7 @@ public class CarModel : NetworkBehaviour
 
     private void FixedUpdate()
     {
+        // figuring this out, even with some guided help from documentation, sucked ass. but i can't say it's not fun to deal with.
         speedMS = Mathf.RoundToInt(rb.linearVelocity.magnitude);
         fSpeed = Vector3.Dot(transform.forward, rb.linearVelocity);
         sFactor = Mathf.InverseLerp(0, cVars.maxSpeed, Mathf.Abs(fSpeed));

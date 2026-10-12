@@ -14,7 +14,7 @@ public class NetworkedPlayer : NetworkBehaviour
 
     public override void OnDestroy()
     {
-        if (!IsLocalPlayer) return; 
+        if (!IsLocalPlayer) return;
         if(carController) carController.RemovePlayer_Rpc(OwnerClientId);
     }
 
@@ -24,7 +24,7 @@ public class NetworkedPlayer : NetworkBehaviour
         
         if (carController)
         {
-            StartCoroutine(CallNextFrame());
+            StartCoroutine(CallNextFrame()); // call AddPlayer_Rpc next frame, just to make sure things are in place
         }
     }
 

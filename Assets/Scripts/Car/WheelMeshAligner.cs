@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class WheelMeshAligner : MonoBehaviour
 {
+    // This is kind of 'taken'-ish from the Unity documentation on the WheelCollider component.
     [SerializeField] private WheelCollider wheel;
 
     private void FixedUpdate()

@@ -23,10 +23,12 @@ public struct PublicCarStateData : INetworkSerializable
 {
     public GearShift Gear;
     public float SpeedKmh;
+    public float SteeringAngle;
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
         serializer.SerializeValue(ref Gear);
         serializer.SerializeValue(ref SpeedKmh);
+        serializer.SerializeValue(ref SteeringAngle);
     }
 }
 public class NetworkedCarHandler : NetworkBehaviour
@@ -108,6 +110,10 @@ public class NetworkedCarHandler : NetworkBehaviour
         float brake = 0;
         int pCount = players.Count; // used for division of control, on the off chance that these values are off at all, it will just get set to 1.
         if (pCount == 0) pCount = 1;
+        /*  WHY DIVIDE YOU ASK?
+         *  previously, everyone had equal control over everything. this was fine, because it meant that each person could just willingly choose to ignore some parts of the car. i don't want that.
+         *  now, each person has n% control over the car, n being 1 / pCount. 4 players means 25% control per person, requiring everyone to cooperate properly.
+         *  my testing with 2 people (me, and one other person) was infinitely more fun with 50% control per input, simply because to turn properly, we had to actually do it together. */
         foreach (var (id, data) in players)
         {
             Debug.Log($"{id} [STEERING] [DATA]: {data.Steering} (div: {data.Steering / pCount})");
@@ -145,12 +151,13 @@ public class NetworkedCarHandler : NetworkBehaviour
         PublicCarStateData carData = new PublicCarStateData()
         {
             SpeedKmh = car.speedMS,
-            Gear = car.gear
+            Gear = car.gear,
+            SteeringAngle = car.steeringValue
         };
 
         try
         {
-            carStateUI.UpdateCarState_Rpc(carData);
+            carStateUI.UpdateCarState_Rpc(carData); // send out new updated data to everyone
         }
         catch (Exception ex)
         {
