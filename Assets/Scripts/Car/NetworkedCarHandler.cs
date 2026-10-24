@@ -24,12 +24,14 @@ public struct PublicCarData : INetworkSerializable
     public GearShift Gear;
     public float SpeedKmh;
     public float MaxSpeed;
+    public bool Accelerating;
     public float SteeringAngle;
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
         serializer.SerializeValue(ref Gear);
         serializer.SerializeValue(ref SpeedKmh);
         serializer.SerializeValue(ref MaxSpeed);
+        serializer.SerializeValue(ref Accelerating);
         serializer.SerializeValue(ref SteeringAngle);
     }
 }
@@ -39,7 +41,8 @@ public class NetworkedCarHandler : NetworkBehaviour
     public CarModel car;
     [FormerlySerializedAs("carStateUI")] [FormerlySerializedAs("CarStateVisual")] public CarState carState;
     private Dictionary<ulong, NetPlayData> players = new();
-    
+    private bool _isAccelerating = false;
+
     public override void OnNetworkSpawn()
     {
     }
@@ -138,6 +141,7 @@ public class NetworkedCarHandler : NetworkBehaviour
             if(playersBraking > 0) brake = Mathf.Clamp(brake + data.Brake / playersBraking, -1, 1);    
         }
 
+        _isAccelerating = playersAccelerating > 0;
         if(!Mathf.Approximately(car.steeringValue, steering)) car.steeringValue = steering;
         if(!Mathf.Approximately(car.accelerateValue, accelerator)) car.accelerateValue = accelerator;
         if(!Mathf.Approximately(car.brakeValue, brake)) car.brakeValue = brake;
@@ -172,7 +176,8 @@ public class NetworkedCarHandler : NetworkBehaviour
             SpeedKmh = car.speedMS,
             Gear = car.gear,
             SteeringAngle = car.steeringValue,
-            MaxSpeed = car.cVars.maxSpeed
+            MaxSpeed = car.cVars.maxSpeed,
+            Accelerating = _isAccelerating
         };
 
         try

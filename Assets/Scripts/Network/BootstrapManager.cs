@@ -36,7 +36,7 @@ public class BootstrapManager : MonoBehaviour
 	{
 		GUILayout.BeginArea(new Rect(10, 10, 200, 400));
 		GUILayout.Label("Roadtrippers Prototype");
-		GUILayout.Label("26T3 GPG222 (1033478)");
+		GUILayout.Label("GPG222 Phoebe (1033478)");
 
 		NetworkManager networkManager = NetworkManager.Singleton;
 		if (networkManager && !networkManager.IsClient && !networkManager.IsServer)

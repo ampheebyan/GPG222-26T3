@@ -4,6 +4,7 @@ using UnityEngine;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine.Serialization;
+using Random = UnityEngine.Random;
 
 public class CarState : NetworkBehaviour
 {
@@ -14,6 +15,8 @@ public class CarState : NetworkBehaviour
     public SteeringWheelAlignment steeringWheel;
     public AudioSource engineSound;
     public float maxVolume = 1.0f; // max volume just set here for now. will add menus and move it later
+    public Vector2 pitchRange = new Vector2(1.0f, 1.5f);
+    public float time = 0f;
     [Rpc(SendTo.ClientsAndHost)]
     public void UpdateCarState_Rpc(PublicCarData data)
     {
@@ -23,6 +26,8 @@ public class CarState : NetworkBehaviour
         {
             float vol = Mathf.InverseLerp(0.0f, car.MaxSpeed, car.SpeedKmh);
             engineSound.volume = Mathf.Clamp(vol, 0f, maxVolume);
+            time = Mathf.MoveTowards(time, car.Accelerating ? 1f: 0f, Time.deltaTime);
+            engineSound.pitch = Mathf.Lerp(pitchRange.x, pitchRange.y, time) + Random.Range(0.01f, 0.075f);
         }
     }
 
