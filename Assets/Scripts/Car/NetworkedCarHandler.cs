@@ -19,22 +19,25 @@ public struct NetPlayData : INetworkSerializable
 }
 
 [Serializable]
-public struct PublicCarStateData : INetworkSerializable
+public struct PublicCarData : INetworkSerializable
 {
     public GearShift Gear;
     public float SpeedKmh;
+    public float MaxSpeed;
     public float SteeringAngle;
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
         serializer.SerializeValue(ref Gear);
         serializer.SerializeValue(ref SpeedKmh);
+        serializer.SerializeValue(ref MaxSpeed);
         serializer.SerializeValue(ref SteeringAngle);
     }
 }
 public class NetworkedCarHandler : NetworkBehaviour
 {
+    public bool stopped = true;
     public CarModel car;
-    [FormerlySerializedAs("CarStateVisual")] public CarStateUI carStateUI;
+    [FormerlySerializedAs("carStateUI")] [FormerlySerializedAs("CarStateVisual")] public CarState carState;
     private Dictionary<ulong, NetPlayData> players = new();
     
     public override void OnNetworkSpawn()
@@ -105,6 +108,8 @@ public class NetworkedCarHandler : NetworkBehaviour
     [Rpc(SendTo.Server)]
     private void UpdateCarValues_Rpc()
     {
+        if (stopped) return;
+        
         float steering = 0;
         float accelerator = 0;
         float brake = 0;
@@ -114,14 +119,23 @@ public class NetworkedCarHandler : NetworkBehaviour
          *  previously, everyone had equal control over everything. this was fine, because it meant that each person could just willingly choose to ignore some parts of the car. i don't want that.
          *  now, each person has n% control over the car, n being 1 / pCount. 4 players means 25% control per person, requiring everyone to cooperate properly.
          *  my testing with 2 people (me, and one other person) was infinitely more fun with 50% control per input, simply because to turn properly, we had to actually do it together. */
+        int playersSteering = 0;
+        int playersAccelerating = 0;
+        int playersBraking = 0;
         foreach (var (id, data) in players)
         {
-            Debug.Log($"{id} [STEERING] [DATA]: {data.Steering} (div: {data.Steering / pCount})");
-            Debug.Log($"{id} [ACCELERATOR] [DATA]: {data.Accelerator} (div: {data.Accelerator / pCount})");
-            Debug.Log($"{id} [BRAKE] [DATA]: {data.Brake} (div: {data.Brake / pCount})");
-            steering = Mathf.Clamp(steering + data.Steering / pCount, -1, 1);    
-            accelerator = Mathf.Clamp(accelerator + data.Accelerator / pCount, -1, 1);    
-            brake = Mathf.Clamp(brake + data.Brake / pCount, -1, 1);    
+            if(data.Steering != 0) playersSteering += 1;
+            if(data.Accelerator != 0) playersAccelerating += 1;
+            if(data.Brake != 0) playersBraking += 1;
+            
+            Debug.Log($"steering: {playersSteering} / accel: {playersAccelerating} / braking: {playersBraking}");
+            Debug.Log($"{id} [STEERING] [DATA]: {data.Steering}");
+            Debug.Log($"{id} [ACCELERATOR] [DATA]: {data.Accelerator}");
+            Debug.Log($"{id} [BRAKE] [DATA]: {data.Brake}");
+
+            if(playersSteering > 0) steering = Mathf.Clamp(steering + data.Steering / playersSteering, -1, 1);    
+            if(playersAccelerating > 0) accelerator = Mathf.Clamp(accelerator + data.Accelerator / playersAccelerating, -1, 1);    
+            if(playersBraking > 0) brake = Mathf.Clamp(brake + data.Brake / playersBraking, -1, 1);    
         }
 
         if(!Mathf.Approximately(car.steeringValue, steering)) car.steeringValue = steering;
@@ -134,6 +148,8 @@ public class NetworkedCarHandler : NetworkBehaviour
     [Rpc(SendTo.Server)]
     public void GearShiftUp_Rpc()
     {
+        if (stopped) return;
+
         car.gear = (GearShift)Mathf.Clamp((int)(car.gear + 1), 0, 3);
         CarStateBroadcast();
     }
@@ -141,6 +157,8 @@ public class NetworkedCarHandler : NetworkBehaviour
     [Rpc(SendTo.Server)]
     public void GearShiftDown_Rpc()
     {
+        if (stopped) return;
+
         car.gear = (GearShift)Mathf.Clamp((int)(car.gear - 1), 0, 3);
         CarStateBroadcast();
     }
@@ -148,16 +166,18 @@ public class NetworkedCarHandler : NetworkBehaviour
     private void CarStateBroadcast()
     {
         if (!IsServer) return; // should ideally never be the case, but as a preventative measure.
-        PublicCarStateData carData = new PublicCarStateData()
+        
+        PublicCarData carData = new PublicCarData()
         {
             SpeedKmh = car.speedMS,
             Gear = car.gear,
-            SteeringAngle = car.steeringValue
+            SteeringAngle = car.steeringValue,
+            MaxSpeed = car.cVars.maxSpeed
         };
 
         try
         {
-            carStateUI.UpdateCarState_Rpc(carData); // send out new updated data to everyone
+            carState.UpdateCarState_Rpc(carData); // send out new updated data to everyone
         }
         catch (Exception ex)
         {

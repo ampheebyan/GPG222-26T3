@@ -11,10 +11,17 @@ public class NetworkedPlayer : NetworkBehaviour
     public GameManager instancedGameManager;
     public int carIndex = 0;
     public NetPlayData localData = new NetPlayData();
+    public bool disconnected = false;
+    private Coroutine _waitForGm;
+    private void Awake()
+    {
+        _waitForGm = StartCoroutine(WaitForGameManager());
+    }
 
     public override void OnDestroy()
     {
-        if (!IsLocalPlayer) return;
+        if(_waitForGm != null) StopCoroutine(_waitForGm); // When destroying, if still looking for GameManager, stop that.
+        if (IsServer || disconnected) return;
         if(carController) carController.RemovePlayer_Rpc(OwnerClientId);
     }
 
@@ -37,19 +44,24 @@ public class NetworkedPlayer : NetworkBehaviour
             carController.AddPlayer_Rpc(OwnerClientId);
         }
     }
+
+    private IEnumerator WaitForGameManager()
+    {
+        while (!GameManager.Instance) yield return null;
+        instancedGameManager = GameManager.Instance;
+        carController = instancedGameManager.networkedCars[carIndex];
+        instancedGameManager.OnDisconnect += OnDisconnect;
+    }
+
+    private void OnDisconnect()
+    {
+        disconnected = true;
+    }
+
     public override void OnNetworkSpawn()
     {
         Debug.Log($"{OwnerClientId}: Spawned NetworkedPlayer");
 
-        if (GameManager.Instance)
-        {
-            instancedGameManager = GameManager.Instance;
-            carController = instancedGameManager.networkedCars[carIndex];
-            if (!carController)
-            {
-                throw new Exception("No possible Networked Car.");
-            }
-        }
         if (!IsLocalPlayer)
         {
             if (TryGetComponent(out PlayerInput playerInput))
