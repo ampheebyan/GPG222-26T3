@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 819256373370538007}
   - component: {fileID: 6060357253511548922}
   - component: {fileID: 7210067200433113101}
+  - component: {fileID: 5044122671252720080}
   m_Layer: 0
   m_Name: NetManager
   m_TagString: Untagged
@@ -55,7 +56,7 @@ MonoBehaviour:
       - {fileID: 11400000, guid: 331893a96182f6f4aa6755d2f956c47f, type: 2}
     TickRate: 30
     ClientConnectionBufferTimeout: 10
-    ConnectionApproval: 0
+    ConnectionApproval: 1
     ConnectionData: 
     EnableTimeResync: 0
     TimeResyncInterval: 30
@@ -107,3 +108,18 @@ MonoBehaviour:
     PacketDelayMS: 0
     PacketJitterMS: 0
     PacketDropRate: 0
+--- !u!114 &5044122671252720080
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3055838257175837259}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c79bf627e384bd9ab22d080b7ceb34d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ConnectionHandler
+  networkManager: {fileID: 6060357253511548922}
+  maxPlayers: 4
+  disconnectReason: 

@@ -5,7 +5,7 @@ using Unity.Netcode.Transports.UTP;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class MenuManager : MonoBehaviour
+public class MainMenuManager : MonoBehaviour
 {
     public BootstrapManager bootstrapManager;
     public NetworkManager networkManager;
@@ -56,7 +56,13 @@ public class MenuManager : MonoBehaviour
         if (bootstrapManager == null) return;
         StartCoroutine(HandleTransport());
     }
-    
+    public void Disconnect()
+    {
+        if (NetworkManager.Singleton)
+        {
+            NetworkManager.Singleton.Shutdown();
+        }
+    }
     public void ExitGame()
     {
 #if !UNITY_EDITOR

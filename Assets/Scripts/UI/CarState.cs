@@ -25,7 +25,7 @@ public class CarState : NetworkBehaviour
         if (engineSound)
         {
             float vol = Mathf.InverseLerp(0.0f, car.MaxSpeed, car.SpeedKmh);
-            engineSound.volume = Mathf.Clamp(vol, 0f, maxVolume);
+            engineSound.volume = Mathf.Clamp(vol, 0.15f, maxVolume);
             time = Mathf.MoveTowards(time, car.Accelerating ? 1f: 0f, Time.deltaTime);
             engineSound.pitch = Mathf.Lerp(pitchRange.x, pitchRange.y, time) + Random.Range(0.01f, 0.075f);
         }

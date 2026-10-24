@@ -44,12 +44,10 @@ public class GameManager : NetworkBehaviour
         {
             NetworkManager.Singleton.OnClientStopped += b =>
             {
-                if (!b)
-                {
-                    Debug.Log("Got disconnected, returning to main menu.");
-                    OnDisconnect?.Invoke();
-                    SceneManager.LoadScene("Menu");
-                }
+                if(b) Debug.Log("Host client was disconnected? Assuming server stopped.");
+                Debug.Log("Got disconnected, returning to main menu.");
+                OnDisconnect?.Invoke();
+                SceneManager.LoadScene("Menu");
             };
         }
     }
