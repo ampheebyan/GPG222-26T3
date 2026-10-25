@@ -17,11 +17,14 @@ public class SoloBootstrapManager : MonoBehaviour
 
 	IEnumerator FindConnectionHandler()
 	{
+		yield return null;
+		
 		while (!ConnectionHandler.Instance) yield return null;
 		_connectionHandler = ConnectionHandler.Instance;
 		if(_connectionHandler)
 			_connectionHandler.maxPlayers = 1;
 
+		while (!NetworkManager.Singleton) yield return null;
 		if (NetworkManager.Singleton)
 		{
 			NetworkManager.Singleton.StartHost();

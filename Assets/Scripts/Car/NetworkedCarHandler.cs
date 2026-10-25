@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Serialization;
+using Random = UnityEngine.Random;
 
 [Serializable]
 public struct NetPlayData : INetworkSerializable
@@ -26,6 +27,7 @@ public struct PublicCarData : INetworkSerializable
     public float MaxSpeed;
     public bool Accelerating;
     public float SteeringAngle;
+    public Vector2 CarHealth;
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
         serializer.SerializeValue(ref Gear);
@@ -33,6 +35,7 @@ public struct PublicCarData : INetworkSerializable
         serializer.SerializeValue(ref MaxSpeed);
         serializer.SerializeValue(ref Accelerating);
         serializer.SerializeValue(ref SteeringAngle);
+        serializer.SerializeValue(ref CarHealth);
     }
 }
 public class NetworkedCarHandler : NetworkBehaviour
@@ -42,15 +45,48 @@ public class NetworkedCarHandler : NetworkBehaviour
     [FormerlySerializedAs("carStateUI")] [FormerlySerializedAs("CarStateVisual")] public CarState carState;
     private Dictionary<ulong, NetPlayData> players = new();
     private bool _isAccelerating = false;
-
+    private Vector2 _carHealth = new ();
+    public Vector3 originPosition;
+    public Quaternion originRotation;
     public override void OnNetworkSpawn()
     {
+        if (IsServer)
+        {
+            _carHealth = new(car.cVars.carHealth, car.cVars.carHealth);
+            originPosition = transform.position;
+            originRotation = transform.rotation;
+        }
+    }
+
+    private void CarReset()
+    {
+        if (!IsServer) return; // This should never be executed by the players.
+        stopped = true;
+        _carHealth = new(car.cVars.carHealth, car.cVars.carHealth);
+        transform.position = originPosition;
+        transform.rotation = originRotation;
+        stopped = false;
+    }
+
+    private void OnCollisionEnter(Collision other)
+    {
+        if (IsServer)
+        {
+            if (other.gameObject.TryGetComponent(out ObstacleTag tag))
+            {
+                if (car.speedMS >= tag.speedRequirement)
+                {
+                    _carHealth.x -= Random.Range(tag.damageRange.x, tag.damageRange.y);
+                }
+            } else _carHealth.x -= 1;
+        }
     }
 
     private void FixedUpdate()
     {
         if (IsServer)
         {
+            if(_carHealth.x <= 0) CarReset();
             try
             {
                 CarStateBroadcast();
@@ -179,7 +215,8 @@ public class NetworkedCarHandler : NetworkBehaviour
             Gear = car.gear,
             SteeringAngle = car.steeringValue,
             MaxSpeed = car.cVars.maxSpeed,
-            Accelerating = _isAccelerating
+            Accelerating = _isAccelerating,
+            CarHealth = _carHealth
         };
 
         try

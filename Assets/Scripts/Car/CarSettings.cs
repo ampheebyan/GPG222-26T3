@@ -8,4 +8,5 @@ public class CarSettings : ScriptableObject
     public float brakePower = 12000f;
     public Vector2 angle = new (30, 60);
     public float maxSpeed = 33f;
+    public float carHealth = 20f;
 }

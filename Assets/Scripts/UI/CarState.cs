@@ -15,6 +15,7 @@ public class CarState : NetworkBehaviour
     public SteeringWheelAlignment steeringWheel;
     public AudioSource engineSound;
     public AudioSource gearShiftSound;
+    public ParticleSystem smokeParticles;
     public float maxVolume = 1.0f; // max volume just set here for now. will add menus and move it later
     public Vector2 pitchRange = new Vector2(1.0f, 1.5f);
     public float time = 0f;
@@ -29,6 +30,24 @@ public class CarState : NetworkBehaviour
             engineSound.volume = Mathf.Clamp(vol, 0.15f, maxVolume);
             time = Mathf.MoveTowards(time, car.Accelerating ? 1f: 0f, Time.deltaTime);
             engineSound.pitch = Mathf.Lerp(pitchRange.x, pitchRange.y, time) + Random.Range(0.01f, 0.075f);
+        }
+
+        if (smokeParticles)
+        {
+            if (car.CarHealth.x <= car.CarHealth.y / 2)
+            {
+                if(!smokeParticles.isPlaying) smokeParticles.Play();
+                var smokeParticlesMain = smokeParticles.main;
+                var color = smokeParticlesMain.startColor.color;
+                color.a = Mathf.InverseLerp(0, car.CarHealth.y / 2, car.CarHealth.x);
+                var gradient = smokeParticlesMain.startColor;
+                gradient.color = color;
+                smokeParticlesMain.startColor = gradient;
+            }
+            else
+            {
+                smokeParticles.Stop();
+            }
         }
     }
 
