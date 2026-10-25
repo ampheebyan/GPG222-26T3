@@ -156,6 +156,7 @@ public class NetworkedCarHandler : NetworkBehaviour
 
         car.gear = (GearShift)Mathf.Clamp((int)(car.gear + 1), 0, 3);
         CarStateBroadcast();
+        carState.GearShiftSound_Rpc();
     }
     
     [Rpc(SendTo.Server)]
@@ -165,6 +166,7 @@ public class NetworkedCarHandler : NetworkBehaviour
 
         car.gear = (GearShift)Mathf.Clamp((int)(car.gear - 1), 0, 3);
         CarStateBroadcast();
+        carState.GearShiftSound_Rpc();
     }
 
     private void CarStateBroadcast()

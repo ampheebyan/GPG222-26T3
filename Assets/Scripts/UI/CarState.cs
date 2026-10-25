@@ -14,6 +14,7 @@ public class CarState : NetworkBehaviour
     public TMP_Text text;
     public SteeringWheelAlignment steeringWheel;
     public AudioSource engineSound;
+    public AudioSource gearShiftSound;
     public float maxVolume = 1.0f; // max volume just set here for now. will add menus and move it later
     public Vector2 pitchRange = new Vector2(1.0f, 1.5f);
     public float time = 0f;
@@ -28,6 +29,16 @@ public class CarState : NetworkBehaviour
             engineSound.volume = Mathf.Clamp(vol, 0.15f, maxVolume);
             time = Mathf.MoveTowards(time, car.Accelerating ? 1f: 0f, Time.deltaTime);
             engineSound.pitch = Mathf.Lerp(pitchRange.x, pitchRange.y, time) + Random.Range(0.01f, 0.075f);
+        }
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    public void GearShiftSound_Rpc()
+    {
+        if (gearShiftSound)
+        {
+            gearShiftSound.volume = Mathf.Clamp(gearShiftSound.volume, 0f, maxVolume);
+            gearShiftSound.Play();
         }
     }
 
