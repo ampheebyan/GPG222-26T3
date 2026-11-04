@@ -14,11 +14,13 @@ public class MainMenuManager : MonoBehaviour
     
     public GameObject hostMenu;
     public TMP_Text hostText;
+    public TMP_Text hostButtonText;
     public TMP_Text statusText;
     public GameObject clientMenu;
     public TMP_InputField serverJoinCode;
     public Slider maxPlayers;
     public GameObject connectionMenu;
+    private bool _waiting;
     IEnumerator HandleTransport()
     {
         while (!NetworkManager.Singleton) yield return null;
@@ -81,6 +83,7 @@ public class MainMenuManager : MonoBehaviour
 
     public void HostRelayGame()
     {
+        _waiting = true;
         if (maxPlayers) bootstrapManager.connectionHandler.maxPlayers = (int)maxPlayers.value;
         if (bootstrapManager) bootstrapManager.StartHostingRelayGame();
     }
@@ -89,6 +92,7 @@ public class MainMenuManager : MonoBehaviour
     {
         if (serverJoinCode)
         {
+            _waiting = true;
             if (bootstrapManager && !string.IsNullOrEmpty(serverJoinCode.text))
                 bootstrapManager.StartClientWithRelay(serverJoinCode.text, "udp");
         }
@@ -108,14 +112,18 @@ public class MainMenuManager : MonoBehaviour
     {
         if (!networkManager) return;
         
+        if (networkManager.IsServer || networkManager.IsClient) _waiting = false;
+        
         if (hostMenu) hostMenu.SetActive(networkManager.IsServer);
+        if (clientMenu) clientMenu.SetActive(networkManager.IsClient && !networkManager.IsServer);
+        
         if (hostText)
         {
             hostText.text = $"You are hosting the server\n{bootstrapManager.joinCode}";
         }
-        if (clientMenu) clientMenu.SetActive(networkManager.IsClient && !networkManager.IsServer);
+        if (hostButtonText) hostButtonText.text = $"Host ({maxPlayers.value})";
         
-        if (connectionMenu) connectionMenu.SetActive(!(networkManager.IsClient || networkManager.IsServer));
+        if (connectionMenu) connectionMenu.SetActive(!(networkManager.IsClient || networkManager.IsServer || _waiting));
         if (statusText && !string.IsNullOrEmpty(bootstrapManager.connectionHandler.disconnectReason)) statusText.text = CleanupDisconnectText(bootstrapManager.connectionHandler.disconnectReason);
     }
 }
