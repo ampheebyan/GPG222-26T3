@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
 using Unity.Netcode;
+using Unity.Services.Authentication;
+using Unity.Services.Core;
+using Unity.Services.Relay;
+using Unity.Services.Relay.Models;
 using UnityEngine.Serialization;
 
-/// <summary>
-/// Simple Class to display helper buttons and status labels on the GUI, as well as buttons to start host/client/server.
-/// </summary>
 public class BootstrapManager : MonoBehaviour
 {
 	[SerializeField]
@@ -17,14 +19,15 @@ public class BootstrapManager : MonoBehaviour
 	private float buttonHeight = 40f;
 
 	public UnityTransport transport;
-	private ConnectionHandler _connectionHandler;
+	public string joinCode;
+	[FormerlySerializedAs("_connectionHandler")] public ConnectionHandler connectionHandler;
 	string _ipAddress = "127.0.0.1";
 	string _maxPlayers = "4";
-
+	private bool _signedIn = false;
 	IEnumerator FindConnectionHandler()
 	{
 		while (!ConnectionHandler.Instance) yield return null;
-		_connectionHandler = ConnectionHandler.Instance;
+		connectionHandler = ConnectionHandler.Instance;
 	}
 
 	private void Awake()
@@ -34,6 +37,7 @@ public class BootstrapManager : MonoBehaviour
 
 	private void OnGUI()
 	{
+		/*
 		GUILayout.BeginArea(new Rect(10, 10, 200, 400));
 		GUILayout.Label("Roadtrippers Prototype");
 		GUILayout.Label("GPG222 Phoebe (1033478)");
@@ -53,8 +57,8 @@ public class BootstrapManager : MonoBehaviour
 
 			if (int.TryParse(_maxPlayers, out int players))
 			{
-				if(_connectionHandler)
-					_connectionHandler.maxPlayers = players;
+				if(connectionHandler)
+					connectionHandler.maxPlayers = players;
 			}
 
 			if (GUILayout.Button("Host", myButtonStyle))
@@ -71,15 +75,28 @@ public class BootstrapManager : MonoBehaviour
 				NewIPAddress(_ipAddress);
 				networkManager.StartClient();
 			}
-			
-			if (_connectionHandler)
+
+			if (GUILayout.Button("Start Server through Relay", myButtonStyle))
 			{
-				if(!string.IsNullOrEmpty(_connectionHandler.disconnectReason))
+				StartHostWithRelay(connectionHandler.maxPlayers, "udp");
+			}
+			
+			GUILayout.Label("Relay Code");
+			joinCode = GUILayout.TextField(joinCode, 32);
+			if (GUILayout.Button("Connect as Client", myButtonStyle))
+			{
+				StartClientWithRelay(joinCode, "udp");
+			}
+
+			
+			if (connectionHandler)
+			{
+				if(!string.IsNullOrEmpty(connectionHandler.disconnectReason))
 				{
-					GUILayout.Label($"Client disconnected: {_connectionHandler.disconnectReason}.");
+					GUILayout.Label($"Client disconnected: {connectionHandler.disconnectReason}.");
 					if (GUILayout.Button("Dismiss", myButtonStyle))
 					{
-						_connectionHandler.disconnectReason = "";
+						connectionHandler.disconnectReason = "";
 					}
 				}
 			}
@@ -87,8 +104,41 @@ public class BootstrapManager : MonoBehaviour
 		}
 
 		GUILayout.EndArea();
+		*/
 	}
 
+	private async Task InitServices()
+	{
+		if (_signedIn) return;
+		await UnityServices.InitializeAsync();
+		if (!AuthenticationService.Instance.IsSignedIn)
+		{
+			await AuthenticationService.Instance.SignInAnonymouslyAsync();
+			_signedIn = true;
+		}
+	}
+	public async Task<string> StartHostWithRelay(int maxConnections, string connectionType)
+	{
+		await InitServices();
+
+		var allocation = await RelayService.Instance.CreateAllocationAsync(maxConnections);
+		NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(AllocationUtils.ToRelayServerData(allocation, connectionType));
+		joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+		return NetworkManager.Singleton.StartHost() ? joinCode : null;
+	}
+
+	public void StartHostingRelayGame()
+	{
+		StartHostWithRelay(connectionHandler.maxPlayers, "udp");
+	}
+	public async Task<bool> StartClientWithRelay(string joinCode, string connectionType)
+	{
+		await InitServices();
+
+		var allocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
+		NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(AllocationUtils.ToRelayServerData(allocation, connectionType));
+		return !string.IsNullOrEmpty(joinCode) && NetworkManager.Singleton.StartClient();
+	}
 
 	private void NewIPAddress(string ipAddress)
 	{
