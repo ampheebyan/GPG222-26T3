@@ -49,7 +49,7 @@ public class CarModel : NetworkBehaviour
     private void FixedUpdate()
     {
         // figuring this out, even with some guided help from documentation, sucked ass. but i can't say it's not fun to deal with.
-        speedMS = Mathf.RoundToInt(rb.linearVelocity.magnitude);
+        speedMS = rb.linearVelocity.magnitude;
         fSpeed = Vector3.Dot(transform.forward, rb.linearVelocity);
         sFactor = Mathf.InverseLerp(0, cVars.maxSpeed, Mathf.Abs(fSpeed));
         float motorTorque = Mathf.Lerp(cVars.power, 0, sFactor);

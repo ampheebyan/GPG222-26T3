@@ -19,6 +19,13 @@ public class CarState : NetworkBehaviour
     public float maxVolume = 1.0f; // max volume just set here for now. will add menus and move it later
     public Vector2 pitchRange = new Vector2(1.0f, 1.5f);
     public float time = 0f;
+    private VolumeManager volumeManager;
+
+    private void Awake()
+    {
+        volumeManager = VolumeManager.Instance;
+    }
+
     [Rpc(SendTo.ClientsAndHost)]
     public void UpdateCarState_Rpc(PublicCarData data)
     {
@@ -26,8 +33,8 @@ public class CarState : NetworkBehaviour
         steeringWheel.SetAngle(car.SteeringAngle);
         if (engineSound)
         {
-            float vol = Mathf.InverseLerp(0.0f, car.MaxSpeed, car.SpeedKmh);
-            engineSound.volume = Mathf.Clamp(vol, 0.15f, maxVolume);
+            float vol = Mathf.InverseLerp(0.0f, car.MaxSpeed, car.SpeedMS);
+            engineSound.volume = Mathf.Clamp(vol, 0.15f, 1f) * volumeManager.volume;
             time = Mathf.MoveTowards(time, car.Accelerating ? 1f: 0f, Time.deltaTime);
             engineSound.pitch = Mathf.Lerp(pitchRange.x, pitchRange.y, time) + Random.Range(0.01f, 0.075f);
         }
@@ -56,13 +63,13 @@ public class CarState : NetworkBehaviour
     {
         if (gearShiftSound)
         {
-            gearShiftSound.volume = Mathf.Clamp(gearShiftSound.volume, 0f, maxVolume);
+            gearShiftSound.volume = 1 * volumeManager.volume;
             gearShiftSound.Play();
         }
     }
 
     private void FixedUpdate()
     {
-        if(text) text.SetText($"{car.Gear}\n{car.SpeedKmh}m/s");
+        if(text) text.SetText($"{car.Gear}\n{Mathf.RoundToInt(car.SpeedMS)}m/s");
     }
 }

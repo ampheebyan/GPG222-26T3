@@ -23,7 +23,7 @@ public struct NetPlayData : INetworkSerializable
 public struct PublicCarData : INetworkSerializable
 {
     public GearShift Gear;
-    public float SpeedKmh;
+    [FormerlySerializedAs("SpeedKmh")] public float SpeedMS;
     public float MaxSpeed;
     public bool Accelerating;
     public float SteeringAngle;
@@ -31,7 +31,7 @@ public struct PublicCarData : INetworkSerializable
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
         serializer.SerializeValue(ref Gear);
-        serializer.SerializeValue(ref SpeedKmh);
+        serializer.SerializeValue(ref SpeedMS);
         serializer.SerializeValue(ref MaxSpeed);
         serializer.SerializeValue(ref Accelerating);
         serializer.SerializeValue(ref SteeringAngle);
@@ -45,7 +45,8 @@ public class NetworkedCarHandler : NetworkBehaviour
     [FormerlySerializedAs("carStateUI")] [FormerlySerializedAs("CarStateVisual")] public CarState carState;
     private Dictionary<ulong, NetPlayData> players = new();
     private bool _isAccelerating = false;
-    private Vector2 _carHealth = new ();
+    private Vector2 _carHealth = new (); 
+    // one of the pieces of feedback you gave was "Not really sure why carhealth is a Vector? haha. Good use for a comment because there's probably a good reason!", and my reasoning probably isn't great but rather just a readability thing for me: current is X, maximum is Y. I like it this way, and I tend to do this for values that are current/max in my projects, because it feels good to me.
     public Vector3 originPosition;
     public Quaternion originRotation;
     public override void OnNetworkSpawn()
@@ -211,7 +212,7 @@ public class NetworkedCarHandler : NetworkBehaviour
         
         PublicCarData carData = new PublicCarData()
         {
-            SpeedKmh = car.speedMS,
+            SpeedMS = car.speedMS,
             Gear = car.gear,
             SteeringAngle = car.steeringValue,
             MaxSpeed = car.cVars.maxSpeed,
