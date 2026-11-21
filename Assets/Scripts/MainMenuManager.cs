@@ -1,11 +1,18 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+[Serializable]
+public struct MapChoice {
+    public string internalMapName;
+    public string mapName;
+    public string mapDescription;
+}
 
 public class MainMenuManager : MonoBehaviour
 {
@@ -21,6 +28,11 @@ public class MainMenuManager : MonoBehaviour
     public Slider maxPlayers;
     public GameObject connectionMenu;
     private bool _waiting;
+
+    public int mapChoiceIndex;
+    public List<MapChoice> mapChoices = new ();
+    public Slider mapChoiceSlider;
+    public TMP_Text mapChoiceText;
     IEnumerator HandleTransport()
     {
         while (!NetworkManager.Singleton) yield return null;
@@ -42,7 +54,13 @@ public class MainMenuManager : MonoBehaviour
         {
             if (networkManager.IsServer)
             {
-                networkManager.SceneManager.LoadScene("Greyflat", LoadSceneMode.Single);
+                if (mapChoices.Count < 1)
+                {
+                    throw new Exception("No possible map choices! That's not good.");
+                }
+                
+                string sceneName = mapChoices[mapChoiceIndex].internalMapName;
+                networkManager.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
             }
         }
     }
@@ -64,6 +82,7 @@ public class MainMenuManager : MonoBehaviour
         if (bootstrapManager == null) return;
         StartCoroutine(HandleTransport());
         maxPlayers.value = bootstrapManager.connectionHandler.maxPlayers;
+        mapChoiceSlider.value = mapChoiceIndex;
     }
     public void Disconnect()
     {
@@ -116,6 +135,15 @@ public class MainMenuManager : MonoBehaviour
         
         if (hostMenu) hostMenu.SetActive(networkManager.IsServer);
         if (clientMenu) clientMenu.SetActive(networkManager.IsClient && !networkManager.IsServer);
+        
+        if (networkManager.IsServer)
+        {
+            mapChoiceSlider.maxValue = mapChoices.Count - 1;
+            mapChoiceIndex = (int)mapChoiceSlider.value;
+            
+            MapChoice choice = mapChoices[mapChoiceIndex];
+            mapChoiceText.text = $"{choice.mapName}\n<size=75%>{choice.mapDescription}</size>"; 
+        }
         
         if (hostText)
         {
