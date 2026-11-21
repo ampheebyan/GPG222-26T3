@@ -42,7 +42,7 @@ public class MainMenuManager : MonoBehaviour
         {
             if (networkManager.IsServer)
             {
-                networkManager.SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
+                networkManager.SceneManager.LoadScene("Greyflat", LoadSceneMode.Single);
             }
         }
     }
