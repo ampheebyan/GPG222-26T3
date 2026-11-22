@@ -33,6 +33,8 @@ public class MainMenuManager : MonoBehaviour
     public List<MapChoice> mapChoices = new ();
     public Slider mapChoiceSlider;
     public TMP_Text mapChoiceText;
+
+    public TMP_InputField nicknameField;
     IEnumerator HandleTransport()
     {
         while (!NetworkManager.Singleton) yield return null;
@@ -83,7 +85,23 @@ public class MainMenuManager : MonoBehaviour
         StartCoroutine(HandleTransport());
         maxPlayers.value = bootstrapManager.connectionHandler.maxPlayers;
         mapChoiceSlider.value = mapChoiceIndex;
+        if (NicknameHandler.Instance)
+        {
+            nicknameField.text = NicknameHandler.Instance.nickname;
+            nicknameField.onSubmit.AddListener(NicknameFieldChange);
+        }
+        else
+        {
+            nicknameField.readOnly = true;
+            nicknameField.text = "N/A";
+        }
     }
+
+    private void NicknameFieldChange(string text)
+    {
+        NicknameHandler.Instance.SetNick(text);
+    }
+
     public void Disconnect()
     {
         if (NetworkManager.Singleton)

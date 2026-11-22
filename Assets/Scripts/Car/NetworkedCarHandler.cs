@@ -8,11 +8,13 @@ using Random = UnityEngine.Random;
 [Serializable]
 public struct NetPlayData : INetworkSerializable
 {
+    public string Nickname;
     public float Steering;
     public float Accelerator;
     public float Brake;
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
+        serializer.SerializeValue(ref Nickname);
         serializer.SerializeValue(ref Steering);
         serializer.SerializeValue(ref Accelerator);
         serializer.SerializeValue(ref Brake);
@@ -43,7 +45,7 @@ public class NetworkedCarHandler : NetworkBehaviour
     public bool stopped = true;
     public CarModel car;
     [FormerlySerializedAs("carStateUI")] [FormerlySerializedAs("CarStateVisual")] public CarState carState;
-    private Dictionary<ulong, NetPlayData> players = new();
+    public Dictionary<ulong, NetPlayData> players = new();
     private bool _isAccelerating = false;
     private Vector2 _carHealth = new (); 
     // one of the pieces of feedback you gave was "Not really sure why carhealth is a Vector? haha. Good use for a comment because there's probably a good reason!", and my reasoning probably isn't great but rather just a readability thing for me: current is X, maximum is Y. I like it this way, and I tend to do this for values that are current/max in my projects, because it feels good to me.
@@ -57,6 +59,8 @@ public class NetworkedCarHandler : NetworkBehaviour
             originPosition = transform.position;
             originRotation = transform.rotation;
         }
+
+
     }
 
     private void CarReset()
@@ -115,12 +119,16 @@ public class NetworkedCarHandler : NetworkBehaviour
     }
 
     [Rpc(SendTo.Server)]
-    public void AddPlayer_Rpc(ulong id)
+    public void AddPlayer_Rpc(ulong id, string nick)
     {
         if (!IsSpawned) return;
         try
         {
-            players.Add(id, new NetPlayData());
+            players.Add(id, new NetPlayData()
+            {
+                Nickname = nick
+            });
+            
         }
         catch (Exception ex)
         {
@@ -128,7 +136,7 @@ public class NetworkedCarHandler : NetworkBehaviour
             Debug.LogException(ex);
         }
     }
-    
+
     [Rpc(SendTo.Server)]
     public void UpdateValues_Rpc(ulong id, NetPlayData data)
     {

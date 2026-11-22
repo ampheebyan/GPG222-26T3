@@ -25,24 +25,21 @@ public class NetworkedPlayer : NetworkBehaviour
         if(carController) carController.RemovePlayer_Rpc(OwnerClientId);
     }
 
-    protected override void OnNetworkPostSpawn()
-    {
-        if (!IsLocalPlayer) return;
-        
-        if (carController)
-        {
-            StartCoroutine(CallNextFrame()); // call AddPlayer_Rpc next frame, just to make sure things are in place
-        }
-    }
 
     private IEnumerator CallNextFrame()
     {
         yield return null;
+        Debug.Log("CallNextFrame ran");
 
-        if (IsSpawned && carController)
+        string nickname = "mingebag";
+        if (NicknameHandler.Instance)
         {
-            carController.AddPlayer_Rpc(OwnerClientId);
+            nickname = NicknameHandler.Instance.nickname;
+            localData.Nickname = nickname;
         }
+        carController.AddPlayer_Rpc(OwnerClientId, nickname);
+        Debug.Log($"{OwnerClientId} ran AddPlayer_Rpc!");
+
     }
 
     private IEnumerator WaitForGameManager()
@@ -51,6 +48,7 @@ public class NetworkedPlayer : NetworkBehaviour
         instancedGameManager = GameManager.Instance;
         carController = instancedGameManager.networkedCars[carIndex];
         instancedGameManager.OnDisconnect += OnDisconnect;
+        if(carController && IsLocalPlayer) StartCoroutine(CallNextFrame()); // call AddPlayer_Rpc next frame, just to make sure things are in place
     }
 
     private void OnDisconnect()
