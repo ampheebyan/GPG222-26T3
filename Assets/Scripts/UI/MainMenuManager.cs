@@ -85,9 +85,9 @@ public class MainMenuManager : MonoBehaviour
         StartCoroutine(HandleTransport());
         maxPlayers.value = bootstrapManager.connectionHandler.maxPlayers;
         mapChoiceSlider.value = mapChoiceIndex;
-        if (NicknameHandler.Instance)
+        if (NicknameManager.Instance)
         {
-            nicknameField.text = NicknameHandler.Instance.nickname;
+            nicknameField.text = NicknameManager.Instance.nickname;
             nicknameField.onSubmit.AddListener(NicknameFieldChange);
         }
         else
@@ -99,7 +99,7 @@ public class MainMenuManager : MonoBehaviour
 
     private void NicknameFieldChange(string text)
     {
-        NicknameHandler.Instance.SetNick(text);
+        NicknameManager.Instance.SetNick(text);
     }
 
     public void Disconnect()

@@ -10,6 +10,7 @@ public class VolumeManager : MonoBehaviour
     {
         if(Instance == null) { Instance = this; DontDestroyOnLoad(this); } else { Destroy(this); }
         volume = PlayerPrefs.GetFloat("Volume", 1);
+        Debug.Log($"VolumeManager: awake, volume is {volume}");
     }
 
     public void SetVolume(float volume)
@@ -17,5 +18,4 @@ public class VolumeManager : MonoBehaviour
         this.volume = volume;
         PlayerPrefs.SetFloat("Volume", volume);
     }
-    
 }

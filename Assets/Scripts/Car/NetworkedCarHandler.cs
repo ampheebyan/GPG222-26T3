@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -8,12 +9,14 @@ using Random = UnityEngine.Random;
 [Serializable]
 public struct NetPlayData : INetworkSerializable
 {
+    public ulong Id;
     public string Nickname;
     public float Steering;
     public float Accelerator;
     public float Brake;
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
+        serializer.SerializeValue(ref Id);
         serializer.SerializeValue(ref Nickname);
         serializer.SerializeValue(ref Steering);
         serializer.SerializeValue(ref Accelerator);
@@ -46,8 +49,9 @@ public class NetworkedCarHandler : NetworkBehaviour
     public CarModel car;
     [FormerlySerializedAs("carStateUI")] [FormerlySerializedAs("CarStateVisual")] public CarState carState;
     public Dictionary<ulong, NetPlayData> players = new();
-    private bool _isAccelerating = false;
-    private Vector2 _carHealth = new (); 
+    public NetPlayData[] cachedPlayers; // This is a copy of the list that will be duplicated to all clients as needed (e.g. for pause menu user list)
+    private bool _isAccelerating;
+    private Vector2 _carHealth; 
     // one of the pieces of feedback you gave was "Not really sure why carhealth is a Vector? haha. Good use for a comment because there's probably a good reason!", and my reasoning probably isn't great but rather just a readability thing for me: current is X, maximum is Y. I like it this way, and I tend to do this for values that are current/max in my projects, because it feels good to me.
     public Vector3 originPosition;
     public Quaternion originRotation;
@@ -110,7 +114,11 @@ public class NetworkedCarHandler : NetworkBehaviour
     public void RemovePlayer_Rpc(ulong id)
     {
         if (!IsSpawned) return;
-        try { players.Remove(id); }
+        try 
+        { 
+            players.Remove(id);             
+            BroadcastPlayersListRpc(players.Values.ToArray());
+        }
         catch (Exception ex)
         {
             // mostly ignore, assume server is shutting down.
@@ -124,11 +132,14 @@ public class NetworkedCarHandler : NetworkBehaviour
         if (!IsSpawned) return;
         try
         {
+            if(nick.Length > 16) { nick = nick.Substring(0, 16); }
+
             players.Add(id, new NetPlayData()
             {
-                Nickname = nick
+                Nickname = nick,
+                Id = id
             });
-            
+            BroadcastPlayersListRpc(players.Values.ToArray());
         }
         catch (Exception ex)
         {
@@ -137,6 +148,12 @@ public class NetworkedCarHandler : NetworkBehaviour
         }
     }
 
+    [Rpc(SendTo.ClientsAndHost)]
+    private void BroadcastPlayersListRpc(NetPlayData[] players) // This is handled badly, but honestly I didn't want to change how I handled one thing because I am too afraid of breaking another. Technical debt! How fun.
+    {
+        cachedPlayers = players;
+    }
+    
     [Rpc(SendTo.Server)]
     public void UpdateValues_Rpc(ulong id, NetPlayData data)
     {

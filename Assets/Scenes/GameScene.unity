@@ -5912,6 +5912,62 @@ PrefabInstance:
       propertyPath: state
       value: 
       objectReference: {fileID: 1846405053}
+    - target: {fileID: 3825418486875067581, guid: b2fe49d3d014eaa4ba1051ecf1b080e3, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1186326660}
+    - target: {fileID: 3825418486875067581, guid: b2fe49d3d014eaa4ba1051ecf1b080e3, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: Disconnect
+      objectReference: {fileID: 0}
+    - target: {fileID: 4040749273077233075, guid: b2fe49d3d014eaa4ba1051ecf1b080e3, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4040749273077233075, guid: b2fe49d3d014eaa4ba1051ecf1b080e3, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4146318394897532860, guid: b2fe49d3d014eaa4ba1051ecf1b080e3, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4146318394897532860, guid: b2fe49d3d014eaa4ba1051ecf1b080e3, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4146318394897532860, guid: b2fe49d3d014eaa4ba1051ecf1b080e3, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4173440053042056580, guid: b2fe49d3d014eaa4ba1051ecf1b080e3, type: 3}
+      propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1186326660}
+    - target: {fileID: 4173440053042056580, guid: b2fe49d3d014eaa4ba1051ecf1b080e3, type: 3}
+      propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: SetVol
+      objectReference: {fileID: 0}
+    - target: {fileID: 4570077107749642527, guid: b2fe49d3d014eaa4ba1051ecf1b080e3, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4570077107749642527, guid: b2fe49d3d014eaa4ba1051ecf1b080e3, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4768605424755178666, guid: b2fe49d3d014eaa4ba1051ecf1b080e3, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4768605424755178666, guid: b2fe49d3d014eaa4ba1051ecf1b080e3, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4768605424755178666, guid: b2fe49d3d014eaa4ba1051ecf1b080e3, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6850638452649343514, guid: b2fe49d3d014eaa4ba1051ecf1b080e3, type: 3}
       propertyPath: m_InScenePlaced
       value: 1
@@ -6028,6 +6084,17 @@ GameObject:
 --- !u!114 &842635311 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7889229922345849339, guid: b2fe49d3d014eaa4ba1051ecf1b080e3, type: 3}
+  m_PrefabInstance: {fileID: 842635308}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+--- !u!114 &842635312 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5836338114708147591, guid: b2fe49d3d014eaa4ba1051ecf1b080e3, type: 3}
   m_PrefabInstance: {fileID: 842635308}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
@@ -6249,6 +6316,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InGameMenuManager
   menu: {fileID: 842635310}
   volSlider: {fileID: 842635309}
+  instancedGameManager: {fileID: 0}
+  carController: {fileID: 0}
+  carIndex: 0
+  playerList: {fileID: 842635312}
 --- !u!4 &1186326661
 Transform:
   m_ObjectHideFlags: 0
@@ -6984,6 +7055,7 @@ MonoBehaviour:
   stopped: 1
   car: {fileID: 1867524881}
   carState: {fileID: 1846405053}
+  cachedPlayers: []
   originPosition: {x: 0, y: 0, z: 0}
   originRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!1 &1986416509

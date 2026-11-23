@@ -32,9 +32,9 @@ public class NetworkedPlayer : NetworkBehaviour
         Debug.Log("CallNextFrame ran");
 
         string nickname = "mingebag";
-        if (NicknameHandler.Instance)
+        if (NicknameManager.Instance)
         {
-            nickname = NicknameHandler.Instance.nickname;
+            nickname = NicknameManager.Instance.nickname;
             localData.Nickname = nickname;
         }
         carController.AddPlayer_Rpc(OwnerClientId, nickname);

@@ -11,7 +11,6 @@ public class GameManager : NetworkBehaviour
     public Action OnDisconnect;
     private void SceneManagerOnOnSceneEvent(SceneEvent @event)
     {
-        Debug.Log("SceneManager OnSceneEvent");
         if (@event.SceneEventType == SceneEventType.LoadEventCompleted)
         {
             foreach (NetworkedCarHandler networkedCar in networkedCars) networkedCar.stopped = false;
@@ -22,10 +21,10 @@ public class GameManager : NetworkBehaviour
     {
         if (!IsServer)
         {
-            Debug.Log("NOT SERVER");
+            Debug.Log("You are not the server.");
             return;
         }
-        Debug.Log("IS SERVER");
+        Debug.Log("You are the server.");
         
         if (NetworkManager.Singleton)
         {

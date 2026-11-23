@@ -6558,6 +6558,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InGameMenuManager
   menu: {fileID: 1893923766}
   volSlider: {fileID: 720127597}
+  instancedGameManager: {fileID: 0}
+  carController: {fileID: 0}
+  carIndex: 0
+  playerList: {fileID: 8489149237901331090}
 --- !u!4 &1186326661
 Transform:
   m_ObjectHideFlags: 0
@@ -7472,6 +7476,7 @@ MonoBehaviour:
   stopped: 1
   car: {fileID: 1867524881}
   carState: {fileID: 1846405053}
+  cachedPlayers: []
   originPosition: {x: 0, y: 0, z: 0}
   originRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!1 &1893923766 stripped
@@ -7644,6 +7649,18 @@ PrefabInstance:
       propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1186326660}
+    - target: {fileID: 6850638452649343514, guid: b2fe49d3d014eaa4ba1051ecf1b080e3, type: 3}
+      propertyPath: m_InScenePlaced
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6850638452649343514, guid: b2fe49d3d014eaa4ba1051ecf1b080e3, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 2269815709
+      objectReference: {fileID: 0}
+    - target: {fileID: 6850638452649343514, guid: b2fe49d3d014eaa4ba1051ecf1b080e3, type: 3}
+      propertyPath: SceneMigrationSynchronization
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7954827295341445528, guid: b2fe49d3d014eaa4ba1051ecf1b080e3, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -7729,6 +7746,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b2fe49d3d014eaa4ba1051ecf1b080e3, type: 3}
+--- !u!114 &8489149237901331090 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5836338114708147591, guid: b2fe49d3d014eaa4ba1051ecf1b080e3, type: 3}
+  m_PrefabInstance: {fileID: 8489149237901331089}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
