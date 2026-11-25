@@ -8,7 +8,7 @@ public class WheelMeshAligner : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (wheel)
+        if (wheel && wheel.enabled)
         {
             wheel.GetWorldPose(out Vector3 position, out Quaternion rotation);
             transform.position = position;

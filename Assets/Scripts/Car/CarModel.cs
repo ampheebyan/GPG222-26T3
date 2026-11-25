@@ -16,7 +16,15 @@ public class CarModel : NetworkBehaviour
     // All movement is handled on server so disable this for anyone who is Not the server.
     public override void OnNetworkSpawn()
     {
-        if (!IsServer) enabled = false;
+        if (!IsServer)
+        {
+            enabled = false;
+            frontLeftWheel.enabled = false;
+            frontRightWheel.enabled = false;
+            backLeftWheel.enabled = false;
+            backRightWheel.enabled = false;
+            rb.isKinematic = true;
+        }
     }
     
     // https://docs.unity3d.com/6000.0/Documentation/Manual/WheelColliderTutorial.html using this btw, never used WheelColliders before tbh
@@ -27,7 +35,7 @@ public class CarModel : NetworkBehaviour
     public GearShift gear = GearShift.Parked;
     [Header("Car Variables")]
     public CarSettings cVars;
-    [SerializeField] private WheelCollider frontLeftWheel, frontRightWheel, backLeftWheel, backRightWheel;
+    [SerializeField] public WheelCollider frontLeftWheel, frontRightWheel, backLeftWheel, backRightWheel;
     [Header("Extra Assignables")]
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Transform centerOfMass;
@@ -66,7 +74,7 @@ public class CarModel : NetworkBehaviour
         }
         if (brakeValue > 0)
         {
-            if (speedMS > 0f && _bLock == false)
+            if (speedMS >= 0f && _bLock == false)
             {
                 backLeftWheel.motorTorque = 0f;
                 backRightWheel.motorTorque = 0f;

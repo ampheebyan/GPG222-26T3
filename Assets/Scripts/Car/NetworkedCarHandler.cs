@@ -63,8 +63,6 @@ public class NetworkedCarHandler : NetworkBehaviour
             originPosition = transform.position;
             originRotation = transform.rotation;
         }
-
-
     }
 
     private void CarReset()
