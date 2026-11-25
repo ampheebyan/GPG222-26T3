@@ -1,5 +1,5 @@
 using System;
-using Unity.Mathematics;
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -27,6 +27,15 @@ public class StupidSimpleNetworkedTransform : NetworkBehaviour
             lastPosition = transform.position;
             lastRotation = transform.rotation;
             lastScale = transform.localScale;
+        }
+        else
+        {
+            // if not server find all rigidbodies on networked object and make them kinematic
+            Rigidbody[] rigidbodies = GetComponents<Rigidbody>();
+            foreach (Rigidbody rb in rigidbodies)
+            {
+                rb.isKinematic = true;
+            }
         }
     }
 
