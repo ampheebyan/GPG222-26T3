@@ -28,14 +28,16 @@ public class StupidSimpleNetworkedTransform : NetworkBehaviour
             lastRotation = transform.rotation;
             lastScale = transform.localScale;
         }
-        else
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsServer) return;
+        // if not server find all rigidbodies on networked object and make them kinematic
+        Rigidbody[] rigidbodies = GetComponents<Rigidbody>();
+        foreach (Rigidbody rb in rigidbodies)
         {
-            // if not server find all rigidbodies on networked object and make them kinematic
-            Rigidbody[] rigidbodies = GetComponents<Rigidbody>();
-            foreach (Rigidbody rb in rigidbodies)
-            {
-                rb.isKinematic = true;
-            }
+            rb.isKinematic = true;
         }
     }
 
